@@ -1,0 +1,137 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 240 6% 4%;
+    --foreground: 240 6% 92%;
+    --card: 240 6% 9%;
+    --card-foreground: 240 6% 92%;
+    --popover: 240 6% 10%;
+    --popover-foreground: 240 6% 92%;
+    --primary: 240 6% 92%;
+    --primary-foreground: 240 6% 5%;
+    --secondary: 240 5% 13%;
+    --secondary-foreground: 240 6% 88%;
+    --muted: 240 5% 13%;
+    --muted-foreground: 240 4% 58%;
+    --accent: 240 5% 16%;
+    --accent-foreground: 240 6% 92%;
+    --destructive: 0 72% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5% 16%;
+    --input: 240 5% 20%;
+    --ring: 222 90% 68%;
+    --radius: 0.75rem;
+    --sidebar-background: 240 6% 6%;
+    --sidebar-foreground: 240 6% 92%;
+    --sidebar-primary: 240 6% 92%;
+    --sidebar-primary-foreground: 240 6% 5%;
+    --sidebar-accent: 240 5% 14%;
+    --sidebar-accent-foreground: 240 6% 92%;
+    --sidebar-border: 240 5% 14%;
+    --sidebar-ring: 222 90% 68%;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-night-bg text-night-text font-sans antialiased;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+
+  button,
+  a,
+  input,
+  select,
+  [role='button'] {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  ::selection {
+    background: rgba(91, 140, 255, 0.35);
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+  }
+}
+
+@layer components {
+  /* floating glass panel — the core MJ-style surface */
+  .mj-panel {
+    @apply rounded-2xl border border-white/[0.07] bg-night-panel shadow-[0_18px_50px_rgba(0,0,0,0.45)];
+  }
+
+  .mj-row {
+    @apply flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-[13px] font-medium text-night-muted transition-colors hover:bg-white/[0.05] hover:text-night-text;
+  }
+
+  .mj-icon-btn {
+    @apply grid h-11 w-11 place-items-center rounded-xl text-night-faint transition-colors hover:text-night-text;
+  }
+
+  .canvas-dots {
+    background-image: radial-gradient(circle at center, rgba(255, 255, 255, 0.055) 1px, transparent 1px);
+  }
+
+  .glow-blue {
+    background:
+      radial-gradient(120% 160% at 82% 50%, rgba(37, 99, 235, 0.5) 0%, rgba(37, 99, 235, 0.18) 38%, transparent 68%),
+      linear-gradient(180deg, #17181d 0%, #141419 100%);
+  }
+
+  .glow-amber {
+    background:
+      radial-gradient(120% 160% at 82% 50%, rgba(217, 119, 6, 0.55) 0%, rgba(217, 119, 6, 0.2) 38%, transparent 68%),
+      linear-gradient(180deg, #17181d 0%, #141419 100%);
+  }
+
+  /* copilot thinking indicator */
+  .thinking-dot {
+    animation: thinking-pulse 1.2s ease-in-out infinite;
+  }
+  .thinking-dot:nth-child(2) {
+    animation-delay: 0.15s;
+  }
+  .thinking-dot:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+  @keyframes thinking-pulse {
+    0%, 60%, 100% { opacity: 0.25; transform: translateY(0); }
+    30% { opacity: 1; transform: translateY(-2px); }
+  }
+
+  /* dock box drop indicator */
+  .drop-line {
+    height: 2px;
+    border-radius: 999px;
+    background: rgba(91, 140, 255, 0.7);
+    box-shadow: 0 0 8px rgba(91, 140, 255, 0.5);
+  }
+
+  /* chat card entrance */
+  .chat-card-in {
+    animation: chat-card-in 0.22s ease-out;
+  }
+  @keyframes chat-card-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}

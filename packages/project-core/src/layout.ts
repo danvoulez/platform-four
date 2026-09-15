@@ -5,15 +5,35 @@ export interface CanvasPosition {
   readonly y: number
 }
 
+export interface LayoutOptions {
+  /** Horizontal distance between layers, in world pixels. */
+  readonly columnGap?: number
+  /** Vertical distance between siblings within a layer, in world pixels. */
+  readonly rowGap?: number
+}
+
+const DEFAULT_COLUMN_GAP = 300
+const DEFAULT_ROW_GAP = 104
+
 /**
- * Deterministic layered DAG layout.
- * Columns follow topological depth (longest path from a root);
- * rows order nodes inside a layer by creation time.
+ * Deterministic layered layout, in world pixels.
+ *
+ * Columns follow topological depth (longest path from a root) and rows order nodes within a layer
+ * by creation time, so the same graph always lays out the same way — a node does not jump when an
+ * unrelated one is added.
+ *
+ * Each layer is centred on y=0 and the graph starts at x=0; the canvas frames the result, so
+ * absolute placement does not matter, only relative spacing. Output is a *seed*: once a node has a
+ * position the user has chosen, this never moves it again.
  */
 export function layoutGraph(
   nodes: readonly ProjectNode[],
-  edges: readonly ProjectEdge[]
+  edges: readonly ProjectEdge[],
+  options: LayoutOptions = {}
 ): Map<string, CanvasPosition> {
+  const columnGap = options.columnGap ?? DEFAULT_COLUMN_GAP
+  const rowGap = options.rowGap ?? DEFAULT_ROW_GAP
+
   const live = nodes
     .filter((node) => node.tombstonedAt === null)
     .toSorted(
@@ -57,8 +77,10 @@ export function layoutGraph(
       if ((indegree.get(target) ?? 0) <= 0) queue.push(target)
     }
   }
-  // cycles or stragglers: pin to the rightmost layer + 1
-  const maxResolvedDepth = Math.max(0, ...depth.values())
+
+  // A cycle leaves nodes unvisited. Pin them one layer past everything resolved rather than
+  // dropping them: an unlayoutable node must still be reachable on the canvas.
+  const maxResolvedDepth = depth.size > 0 ? Math.max(...depth.values()) : 0
   for (const node of live) {
     if (!depth.has(node.id)) depth.set(node.id, maxResolvedDepth + 1)
   }
@@ -66,21 +88,16 @@ export function layoutGraph(
   const layers = new Map<number, ProjectNode[]>()
   for (const node of live) {
     const layer = depth.get(node.id) ?? 0
-    if (!layers.has(layer)) layers.set(layer, [])
-    layers.get(layer)?.push(node)
+    const bucket = layers.get(layer)
+    if (bucket) bucket.push(node)
+    else layers.set(layer, [node])
   }
 
-  const maxDepth = Math.max(0, ...layers.keys())
   const positions = new Map<string, CanvasPosition>()
-  const xStart = maxDepth === 0 ? 50 : 11
-  const xSpan = maxDepth === 0 ? 0 : 78
-
   for (const [layer, layerNodes] of layers) {
-    const x = xStart + (layer / Math.max(maxDepth, 1)) * xSpan
-    const count = layerNodes.length
+    const offset = ((layerNodes.length - 1) * rowGap) / 2
     layerNodes.forEach((node, index) => {
-      const y = count === 1 ? 46 : 12 + (index / (count - 1)) * 74
-      positions.set(node.id, { x, y })
+      positions.set(node.id, { x: layer * columnGap, y: index * rowGap - offset })
     })
   }
   return positions

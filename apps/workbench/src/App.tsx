@@ -18,6 +18,7 @@ import { BoardView } from '@/components/views/BoardView'
 import { ActivityView } from '@/components/views/ActivityView'
 import { ChatView } from '@/components/views/ChatView'
 import { TerminalView } from '@/components/views/TerminalView'
+import { useMediaQuery, XL_QUERY } from '@/hooks/use-media-query'
 import { useWorkspaceStore } from '@/state/workspace'
 import { cn } from '@/lib/utils'
 
@@ -37,6 +38,10 @@ export default function App() {
   const heroVisible = useWorkspaceStore((state) => state.heroVisible)
   const sideOpen = useWorkspaceStore((state) => state.sideOpen)
   const start = useWorkspaceStore((state) => state.start)
+  // Chosen in JS, not CSS: two mounted canvases would run two ResizeObservers and both would
+  // write the shared viewport store.
+  const wide = useMediaQuery(XL_QUERY)
+  const showGraph = wide || centerView === 'graph'
 
   useEffect(() => {
     void start()
@@ -55,11 +60,8 @@ export default function App() {
           </div>
           <div className="relative flex min-w-0 flex-1 flex-col pb-4 pt-1">
             <div className="relative flex min-h-0 flex-1 px-2 md:px-3">
-              <div className={cn('hidden min-h-0 flex-1 xl:flex', 'flex-col')}>
-                <GraphCanvas />
-              </div>
-              <div className="flex min-h-0 flex-1 flex-col xl:hidden">
-                {centerView === 'graph' ? (
+              <div className="flex min-h-0 flex-1 flex-col">
+                {showGraph ? (
                   <GraphCanvas />
                 ) : (
                   <div className="mj-panel min-h-0 flex-1 overflow-hidden">
